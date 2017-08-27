@@ -24,6 +24,17 @@ def spremeni_datum(datum):
     pravi_mesec = str(meseci.index(datum_slovar['mesec']) + 1)
     return str(datum_slovar['leto']) + '-' + pravi_mesec + '-' + str(datum_slovar['dan'])
 
+def pripravi_stevilko(stevilka):
+    re_stevilke = re.compile(r'(?P<nr>[\d.]*)(?P<ifexp>[e](?P<exp>[+-]?\d*))?')
+    if stevilka == '-':
+        stevilka = '0'
+    stevilka = stevilka.replace(',', '')
+    razbita_stevilka = re.search(re_stevilke, stevilka).groupdict()
+    prava_stevilka = float(razbita_stevilka['nr'])
+    if razbita_stevilka['ifexp'] is not None:
+        prava_stevilka = prava_stevilka * (10 ** (int(razbita_stevilka['exp'])))
+    return prava_stevilka
+
 def podatki_vrstice (vrstica_html):
     regex_datuma = re.compile(r'<td class="text-left">(.*?)</td>', flags=re.DOTALL)
     datum = re.search(regex_datuma, vrstica_html).group(1)
@@ -41,7 +52,7 @@ def podatki_vrstice (vrstica_html):
     ]
     count = 0
     for podatek in re.finditer(regex_podatkov, vrstica_html):
-        vrstica[imena_podatkov[count]] = float(podatek.group(1).replace(',', '').replace('-', '0'))
+        vrstica[imena_podatkov[count]] = pripravi_stevilko(podatek.group(1))
         count += 1
     return vrstica
 
