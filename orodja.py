@@ -17,11 +17,19 @@ def html_kovanca (kovanec):
     request_url += '/historical-data/?start=20170101&end=20171231'
     return rq.get(request_url).text
 
+def spremeni_datum(datum):
+    meseci = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    re_datuma = re.compile(r'(?P<mesec>\w+) (?P<dan>\d+), (?P<leto>\d+)')
+    datum_slovar = re.search(re_datuma, datum).groupdict()
+    pravi_mesec = str(meseci.index(datum_slovar['mesec']) + 1)
+    return str(datum_slovar['leto']) + '-' + pravi_mesec + '-' + str(datum_slovar['dan'])
+
 def podatki_vrstice (vrstica_html):
     regex_datuma = re.compile(r'<td class="text-left">(.*?)</td>', flags=re.DOTALL)
     datum = re.search(regex_datuma, vrstica_html).group(1)
     regex_podatkov = re.compile(r'<td>(.*?)</td>', flags=re.DOTALL)
     podatki = re.search(regex_podatkov, vrstica_html)
+    datum = spremeni_datum(datum)
     vrstica = {'datum': datum}
     imena_podatkov = [
         'zacetna',
